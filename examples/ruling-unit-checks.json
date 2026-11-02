@@ -1,0 +1,22 @@
+{
+  "check": "unit checks",
+  "expiry": "2027-03-01",
+  "floor": {
+    "canary_defects": 30,
+    "canary_shortfall": 0,
+    "ci_history_days": 14,
+    "ci_history_shortfall": 0,
+    "meets_floor": true,
+    "required_canary_defects": 30,
+    "required_ci_history_days": 14
+  },
+  "format": "keeporkill-ruling/1",
+  "repo": "synthetic-repo",
+  "ruling": "quarantine",
+  "signature": {
+    "signed_at": null,
+    "signed_by": null,
+    "status": "unsigned"
+  },
+  "state_after_ruling": "quarantined"
+}

@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "keeporkill"
+version = "0.1.0"
+description = "The courtroom for checks, assembling evidence packs and issuing rulings as pull requests"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+[project.scripts]
+keeporkill = "keeporkill.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["keeporkill*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

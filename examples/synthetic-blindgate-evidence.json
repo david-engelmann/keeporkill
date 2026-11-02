@@ -1,0 +1,11 @@
+{
+  "format": "blindgate-evidence/1",
+  "traces": [
+    {
+      "check": "unit checks",
+      "detail": "the synthetic trace records the settings surface the run consulted",
+      "observation": "read",
+      "surface": "required checks settings"
+    }
+  ]
+}
