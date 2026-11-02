@@ -8,7 +8,13 @@ Checks have no lifecycle in mainstream tooling. A check is required or it is abs
 
 ## Status
 
-Seeded in October 2026. The build has not started. Part of the impatient programming portfolio, in the Gate Truth arc.
+- Slice 2 is built and proven on synthetic targets only
+- Slice 2 assembles one evidence pack per check in the format keeporkill-pack/1 from a catchledger pack or ledger, reading canaryfield results directly or from the pack and blindness traces where blindgate evidence is supplied
+- Slice 2 accounts every pack against the evidence floor of 30 canaryfield-scored planted defects and 14 days of catchledger CI history, read as the span of each check own catch record timestamps, and marks a pack below the floor
+- Slice 2 generates the ruling pull request for a pack at or above the floor as a local ruling record in the format keeporkill-ruling/1 and a body whose numbers all come from the pack, refuses a ruling below the floor naming each failed leg and its shortfall, and emits unsigned records only
+- Slice 2 is the Round 1 work increment and is built on a local branch, and the round closes only after audit and two-axis review and red team and owner approval
+- Closed rounds stand at 1 of 100
+- Seeded in October 2026. Part of the impatient programming portfolio, in the Gate Truth arc
 
 ## Licence
 
