@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import timezone
 from decimal import Decimal, ROUND_HALF_UP
 
-from .errors import KeeporkillError, PackValidationError
+from .errors import TameshiError, PackValidationError
 from .ingest import (
     RESULT_WORDS,
     normalize_canary_document,
@@ -17,7 +17,7 @@ from .ingest import (
 )
 from .names import slugify_check
 
-PACK_FORMAT = "keeporkill-pack/1"
+PACK_FORMAT = "tameshi-pack/1"
 REQUIRED_CANARY_DEFECTS = 30
 REQUIRED_CI_HISTORY_DAYS = 14
 
@@ -45,37 +45,37 @@ def validate_canary_performance(performance):
     if performance is None:
         return None
     if not isinstance(performance, dict) or set(performance) != _PERFORMANCE_FIELDS:
-        raise KeeporkillError("the canary performance has the wrong fields")
+        raise TameshiError("the canary performance has the wrong fields")
     gate = performance["gate"]
     if not isinstance(gate, str) or not gate.strip() or "\n" in gate or "\r" in gate:
-        raise KeeporkillError("the canary performance needs a gate name")
+        raise TameshiError("the canary performance needs a gate name")
     counts = performance["counts"]
     if not isinstance(counts, dict) or set(counts) != set(RESULT_WORDS):
-        raise KeeporkillError("the canary performance counts must cover the four result words")
+        raise TameshiError("the canary performance counts must cover the four result words")
     if not all(type(count) is int and count >= 0 for count in counts.values()):
-        raise KeeporkillError("the canary performance counts must be nonnegative whole numbers")
+        raise TameshiError("the canary performance counts must be nonnegative whole numbers")
     results = performance["results"]
     if not isinstance(results, list):
-        raise KeeporkillError("the canary performance results must be a list")
+        raise TameshiError("the canary performance results must be a list")
     for row in results:
         if not isinstance(row, dict) or set(row) != _PERFORMANCE_ROW_FIELDS:
-            raise KeeporkillError("a canary performance result row has the wrong fields")
+            raise TameshiError("a canary performance result row has the wrong fields")
         for field in ("seed", "name", "defect_class"):
             if not isinstance(row[field], str) or not row[field].strip():
-                raise KeeporkillError(f"a canary performance result row needs a nonempty {field}")
+                raise TameshiError(f"a canary performance result row needs a nonempty {field}")
         if row["result"] not in RESULT_WORDS:
-            raise KeeporkillError("a canary performance result word is not a known result word")
+            raise TameshiError("a canary performance result word is not a known result word")
         if not isinstance(row["planted_files"], list) or not all(
             isinstance(path, str) for path in row["planted_files"]
         ):
-            raise KeeporkillError("a canary performance result row carries malformed planted files")
+            raise TameshiError("a canary performance result row carries malformed planted files")
     if counts != tally_canary_results(results):
-        raise KeeporkillError("the canary performance counts disagree with their result rows")
+        raise TameshiError("the canary performance counts disagree with their result rows")
     scored = _derived_scored(counts)
     if type(performance["scored"]) is not int or performance["scored"] != scored:
-        raise KeeporkillError("the canary performance scored count disagrees with its rows")
+        raise TameshiError("the canary performance scored count disagrees with its rows")
     if performance["catch_rate"] != _ratio(counts["caught"], scored):
-        raise KeeporkillError("the canary performance catch rate disagrees with its rows")
+        raise TameshiError("the canary performance catch rate disagrees with its rows")
     return performance
 
 
@@ -242,5 +242,5 @@ def recompute_floor(pack):
     """Recompute a pack's floor accounting from the pack's own evidence."""
 
     if not isinstance(pack, dict):
-        raise KeeporkillError("an evidence pack must be an object")
+        raise TameshiError("an evidence pack must be an object")
     return floor_accounting(pack.get("canary_performance"), pack.get("catch_record"))

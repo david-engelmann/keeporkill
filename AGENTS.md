@@ -53,12 +53,12 @@ Verify claims from the thing itself. A result is read from the file on disk, the
 <!-- repo annex below this line -->
 
 ## Repo annex
-This annex is keeporkill's alone. The canonical part above this repo's annex is never edited here.
+This annex is tameshi's alone. The canonical part above this repo's annex is never edited here.
 
-Keeporkill judges checks, verdictloop judges changes. This repo is the courtroom for checks, assembling catchledger packs and canaryfield results into one evidence pack per check and issuing the ruling as a pull request.
+Tameshi judges checks, verdictloop judges changes. This repo is the evidence pack tool for checks, assembling catchledger packs and canaryfield results into one evidence pack per check and issuing the ruling as a pull request.
 
 No ruling issues below the evidence floor. A check's evidence must hold at least 30 canaryfield-scored planted defects and at least 14 days of catchledger CI history before any ruling on that check may issue, and a pack below the floor is assembled and marked below floor, and the ruling generator refuses it.
 
 Rulings stay human signed and the tool deletes nothing. The generator emits an unsigned ruling record only, and a human signs the ruling outside the tool.
 
-All inputs are local files. The evidence inputs are catchledger packs and ledgers and canaryfield catch results and, where supplied, blindgate evidence, read from local files only, with synthetic fixtures only and no network in the tool or the tests. The local gate is python -m pytest once the suite exists. The closed round count stands in the README and moves only at a closure.
+All inputs are local files. The evidence inputs are catchledger packs and ledgers and canaryfield catch results and, where supplied, blindgate evidence, read from local files only, with synthetic fixtures only and no network in the tool or the tests. The local gate is python -m pytest and cargo test once the crate exists. The closed round count stands in the README and moves only at a closure.

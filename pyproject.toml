@@ -3,18 +3,18 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "keeporkill"
+name = "tameshi"
 version = "0.1.0"
-description = "The courtroom for checks, assembling evidence packs and issuing rulings as pull requests"
+description = "The evidence pack tool for checks, assembling evidence packs and issuing rulings as pull requests"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 
 [project.scripts]
-keeporkill = "keeporkill.cli:main"
+tameshi = "tameshi.cli:main"
 
 [tool.setuptools.packages.find]
-include = ["keeporkill*"]
+include = ["tameshi*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

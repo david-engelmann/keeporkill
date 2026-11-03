@@ -2,15 +2,15 @@ import copy
 
 import pytest
 
-from keeporkill.errors import KeeporkillError, PackValidationError
-from keeporkill.packs import (
+from tameshi.errors import TameshiError, PackValidationError
+from tameshi.packs import (
     assemble_packs,
     canary_performance,
     catch_record_days,
     floor_accounting,
     validate_pack,
 )
-from keeporkill.ingest import normalize_canary_document
+from tameshi.ingest import normalize_canary_document
 from synthetic_data import (
     at_floor_pack,
     make_blindness_document,
@@ -45,7 +45,7 @@ def test_embedded_canary_counts_are_tallied_from_their_rows():
     assert performance["scored"] == 2
     forged = copy.deepcopy(embedded)
     forged["counts"]["caught"] = 30
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         assemble_packs([make_cl_pack(canaryfield_results=forged)])
 
 
@@ -62,7 +62,7 @@ def test_embedded_canary_forgery_with_scored_thirty_and_no_rows_is_refused():
         "results": [],
         "scored": 30,
     }
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         assemble_packs([make_cl_pack(canaryfield_results=forged)])
 
 
@@ -122,7 +122,7 @@ def test_canaryfield_performance_is_null_without_an_exact_gate_match():
 def test_pack_carries_the_complete_check_evidence():
     cl_pack = make_cl_pack()
     pack = at_floor_pack()
-    assert pack["format"] == "keeporkill-pack/1"
+    assert pack["format"] == "tameshi-pack/1"
     assert pack["repo"] == cl_pack["repo"]
     assert pack["check"] == "unit checks"
     assert pack["catch_record"] == cl_pack["catch_record"]

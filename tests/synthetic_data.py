@@ -1,4 +1,4 @@
-"""Synthetic evidence builders shared by the keeporkill tests.
+"""Synthetic evidence builders shared by the tameshi tests.
 
 Every fixture here is invented for this repo. No real check names, no real
 traces, and no network anywhere.
@@ -209,7 +209,7 @@ AT_FLOOR_WORDS = ["caught"] * 20 + ["waved-through"] * 6 + ["gate-broken"] * 4
 def at_floor_pack(blindness_document=None):
     """Assemble the single pack for a check standing exactly at the floor."""
 
-    from keeporkill.packs import assemble_packs
+    from tameshi.packs import assemble_packs
 
     words = AT_FLOOR_WORDS + ["not-applicable"] * 3
     document = make_canary_document({"unit checks": words})
@@ -225,7 +225,7 @@ def pack_with(scored_words, days, blindness_document=None):
     cannot agree with the per check catch record span these packs carry.
     """
 
-    from keeporkill.packs import assemble_packs
+    from tameshi.packs import assemble_packs
 
     document = make_canary_document({"unit checks": list(scored_words)})
     packs = assemble_packs(

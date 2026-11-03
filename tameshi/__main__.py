@@ -1,4 +1,4 @@
-"""Module entry point for keeporkill."""
+"""Module entry point for tameshi."""
 
 from .cli import main
 

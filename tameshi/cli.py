@@ -1,4 +1,4 @@
-"""Command line entry point for keeporkill."""
+"""Command line entry point for tameshi."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ import json
 import sys
 from pathlib import Path
 
-from .errors import KeeporkillError
+from .errors import TameshiError
 from .ingest import read_catchledger_packs
 from .packs import assemble_packs, validate_pack
 from .report import render_json
@@ -18,11 +18,20 @@ def _read_json(path, label):
     try:
         data = Path(path).read_bytes()
     except OSError as exc:
-        raise KeeporkillError(f"the {label} could not be read") from exc
+        raise TameshiError(f"the {label} could not be read") from exc
+
+    def build_object(pairs):
+        document = {}
+        for key, value in pairs:
+            if key in document:
+                raise TameshiError(f"the {label} carries the key {key} more than once")
+            document[key] = value
+        return document
+
     try:
-        return json.loads(data.decode("utf-8"))
+        return json.loads(data.decode("utf-8"), object_pairs_hook=build_object)
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise KeeporkillError(f"the {label} is not valid JSON") from exc
+        raise TameshiError(f"the {label} is not valid JSON") from exc
 
 
 def _write_text(path, text):
@@ -31,7 +40,7 @@ def _write_text(path, text):
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_text(text, encoding="utf-8")
     except OSError as exc:
-        raise KeeporkillError("an output could not be written") from exc
+        raise TameshiError("an output could not be written") from exc
 
 
 def _assemble(args):
@@ -74,7 +83,7 @@ def _validate(args):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        prog="keeporkill",
+        prog="tameshi",
         description="Assemble evidence packs for checks and generate their rulings.",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -91,7 +100,7 @@ def main(argv=None):
     rule = subparsers.add_parser(
         "rule", help="generate a ruling record and pull request body from an evidence pack"
     )
-    rule.add_argument("--pack", required=True, help="local keeporkill evidence pack JSON")
+    rule.add_argument("--pack", required=True, help="local tameshi evidence pack JSON")
     rule.add_argument(
         "--ruling",
         required=True,
@@ -105,7 +114,7 @@ def main(argv=None):
     validate = subparsers.add_parser(
         "validate", help="validate an evidence pack against the pack rebuilt from its inputs"
     )
-    validate.add_argument("--pack", required=True, help="local keeporkill evidence pack JSON")
+    validate.add_argument("--pack", required=True, help="local tameshi evidence pack JSON")
     validate.add_argument("--catchledger", required=True, help="local catchledger pack or ledger JSON")
     validate.add_argument("--canaryfield", help="local canaryfield catch table JSON")
     validate.add_argument("--blindgate", help="local blindgate evidence JSON")
@@ -114,7 +123,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         return args.handler(args)
-    except KeeporkillError as exc:
+    except TameshiError as exc:
         print(str(exc), file=sys.stderr)
         return 1
 
