@@ -1,0 +1,14 @@
+[package]
+name = "tameshi"
+version = "0.1.0"
+edition = "2021"
+description = "The evidence pack tool for checks, assembling evidence packs and issuing rulings as pull requests"
+license = "MIT"
+
+[lib]
+name = "tameshi"
+path = "src/lib.rs"
+
+[[bin]]
+name = "tameshi"
+path = "src/main.rs"

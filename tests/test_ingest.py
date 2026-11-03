@@ -2,9 +2,9 @@ import copy
 
 import pytest
 
-from keeporkill.errors import KeeporkillError
-from keeporkill.ingest import read_catchledger_packs
-from keeporkill.packs import assemble_packs
+from tameshi.errors import TameshiError
+from tameshi.ingest import read_catchledger_packs
+from tameshi.packs import assemble_packs
 from synthetic_data import (
     make_blindness_document,
     make_canary_document,
@@ -52,35 +52,35 @@ def test_catchledger_input_with_a_missing_or_unexpected_field_is_refused():
     pack = make_cl_pack()
     missing = copy.deepcopy(pack)
     del missing["pricing"]
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         read_catchledger_packs(missing)
     unexpected = copy.deepcopy(pack)
     unexpected["notes"] = "extra"
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         read_catchledger_packs(unexpected)
     thin_scorecard = copy.deepcopy(pack)
     del thin_scorecard["scorecard"]["fires"]
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         read_catchledger_packs(thin_scorecard)
     ledger = make_ledger([make_cl_pack()])
     del ledger["checks"][0]["name"]
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         read_catchledger_packs(ledger)
 
 
 def test_catchledger_input_with_a_wrong_format_name_is_refused():
     pack = make_cl_pack()
     pack["format"] = "catchledger-pack/2"
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         read_catchledger_packs(pack)
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         read_catchledger_packs({"format": "something-else/1"})
 
 
 def test_catchledger_pack_with_a_disagreeing_false_block_rate_is_refused():
     pack = make_cl_pack()
     pack["false_block_rate"] = 0.99
-    with pytest.raises(KeeporkillError) as caught:
+    with pytest.raises(TameshiError) as caught:
         read_catchledger_packs(pack)
     assert "disagrees with its scorecard" in str(caught.value)
 
@@ -88,21 +88,21 @@ def test_catchledger_pack_with_a_disagreeing_false_block_rate_is_refused():
 def test_direct_canaryfield_document_with_a_repeated_seed_is_refused():
     document = make_canary_document({"unit checks": ["caught", "caught"]})
     document["rows"].append(copy.deepcopy(document["rows"][0]))
-    with pytest.raises(KeeporkillError) as caught:
+    with pytest.raises(TameshiError) as caught:
         assemble_packs([make_cl_pack()], document)
     assert "repeats a seed" in str(caught.value)
 
 
 def test_names_with_newlines_are_refused_at_ingest():
     pack = make_cl_pack(check="unit checks\nInjected line")
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         read_catchledger_packs(pack)
     pack = make_cl_pack(repo="synthetic-repo\nInjected line")
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         read_catchledger_packs(pack)
     ledger = make_ledger([make_cl_pack(check="style checks")])
     ledger["checks"][0]["name"] = "style checks\nInjected line"
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         read_catchledger_packs(ledger)
 
 
@@ -132,17 +132,17 @@ def test_direct_canaryfield_results_are_normalized_for_the_matching_check():
 
 def test_malformed_canaryfield_document_is_refused():
     cl_pack = make_cl_pack()
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         assemble_packs([cl_pack], {"gates": ["unit checks"]})
     bad_word = make_canary_document({"unit checks": ["caught"]})
     bad_word["rows"][0]["gates"]["unit checks"] = "missed"
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         assemble_packs([cl_pack], bad_word)
     missing_gate = make_canary_document(
         {"unit checks": ["caught"], "style checks": ["caught"]}
     )
     del missing_gate["rows"][0]["gates"]["style checks"]
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         assemble_packs([cl_pack], missing_gate)
 
 
@@ -150,14 +150,14 @@ def test_malformed_blindness_document_is_refused():
     cl_pack = make_cl_pack()
     wrong_format = make_blindness_document([make_trace("unit checks")])
     wrong_format["format"] = "blindgate-evidence/2"
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         assemble_packs([cl_pack], None, wrong_format)
     thin_trace = make_blindness_document([make_trace("unit checks")])
     del thin_trace["traces"][0]["detail"]
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         assemble_packs([cl_pack], None, thin_trace)
     empty_field = make_blindness_document(
         [make_trace("unit checks", observation="")]
     )
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         assemble_packs([cl_pack], None, empty_field)

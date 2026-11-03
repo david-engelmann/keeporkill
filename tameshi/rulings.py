@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from datetime import date, datetime
 
-from .errors import FloorRefusal, KeeporkillError
+from .errors import FloorRefusal, TameshiError
 from .ingest import (
     validate_catch_record,
     validate_history_window,
@@ -14,7 +14,7 @@ from .ingest import (
 from .names import slugify_check
 from .packs import PACK_FORMAT, floor_accounting, validate_canary_performance
 
-RULING_FORMAT = "keeporkill-ruling/1"
+RULING_FORMAT = "tameshi-ruling/1"
 
 # The slice ruling set maps the caller's word to the verdict word the record
 # carries and the lifecycle state the ruling puts the check in. Kill is not in
@@ -48,40 +48,40 @@ def ruling_slug(check):
 
 def _validate_pack_name(value, label):
     if not isinstance(value, str) or not value.strip():
-        raise KeeporkillError(f"the evidence pack needs a {label}")
+        raise TameshiError(f"the evidence pack needs a {label}")
     if "\n" in value or "\r" in value:
-        raise KeeporkillError(f"the evidence pack {label} must not carry a newline")
+        raise TameshiError(f"the evidence pack {label} must not carry a newline")
 
 
 def _validate_pack(pack):
     if not isinstance(pack, dict):
-        raise KeeporkillError("an evidence pack must be an object")
+        raise TameshiError("an evidence pack must be an object")
     if set(pack) != _PACK_FIELDS:
-        raise KeeporkillError("the evidence pack has the wrong fields")
+        raise TameshiError("the evidence pack has the wrong fields")
     if pack["format"] != PACK_FORMAT:
-        raise KeeporkillError("the evidence pack carries the wrong format name")
+        raise TameshiError("the evidence pack carries the wrong format name")
     _validate_pack_name(pack["repo"], "repository label")
     _validate_pack_name(pack["check"], "check name")
     validate_scorecard(pack["scorecard"])
     validate_catch_record(pack["catch_record"])
     validate_history_window(pack["history_window"])
     if pack["false_block_rate"] != pack["scorecard"]["false_block_rate"]:
-        raise KeeporkillError(
+        raise TameshiError(
             "the evidence pack false block rate disagrees with its scorecard"
         )
     if pack["cost_per_catch_usd"] != pack["scorecard"]["cost_per_catch_usd"]:
-        raise KeeporkillError(
+        raise TameshiError(
             "the evidence pack cost per catch disagrees with its scorecard"
         )
     validate_canary_performance(pack["canary_performance"])
     if not isinstance(pack["blindness_traces"], list):
-        raise KeeporkillError("the evidence pack blindness traces must be a list")
+        raise TameshiError("the evidence pack blindness traces must be a list")
     if not isinstance(pack["floor"], dict):
-        raise KeeporkillError("the evidence pack floor accounting must be an object")
+        raise TameshiError("the evidence pack floor accounting must be an object")
     if not isinstance(pack["below_floor"], bool):
-        raise KeeporkillError("the evidence pack below floor mark must be a boolean")
+        raise TameshiError("the evidence pack below floor mark must be a boolean")
     if not isinstance(pack["sources"], dict):
-        raise KeeporkillError("the evidence pack sources record must be an object")
+        raise TameshiError("the evidence pack sources record must be an object")
 
 
 def _floor_refusal(check, accounting):
@@ -180,11 +180,11 @@ def _calendar_date(value, label):
     if isinstance(value, date) and not isinstance(value, datetime):
         return value
     if not isinstance(value, str) or not _HYPHENATED_DATE.match(value):
-        raise KeeporkillError(f"the {label} must be an ISO calendar date")
+        raise TameshiError(f"the {label} must be an ISO calendar date")
     try:
         return date.fromisoformat(value)
     except ValueError as exc:
-        raise KeeporkillError(f"the {label} must be an ISO calendar date") from exc
+        raise TameshiError(f"the {label} must be an ISO calendar date") from exc
 
 
 def _current_date(today):
@@ -205,22 +205,22 @@ def generate_ruling(pack, ruling, expiry=None, today=None):
 
     _validate_pack(pack)
     if ruling == "kill":
-        raise KeeporkillError(
+        raise TameshiError(
             "kill is outside the ruling set in this slice and waits for its own later rule"
         )
     if ruling not in RULINGS:
-        raise KeeporkillError(f"an unknown ruling was requested ({ruling})")
+        raise TameshiError(f"an unknown ruling was requested ({ruling})")
     if ruling == "quarantine":
         if expiry is None:
-            raise KeeporkillError("a quarantine ruling requires an expiry date")
+            raise TameshiError("a quarantine ruling requires an expiry date")
         expiry_date = _calendar_date(expiry, "expiry")
         if expiry_date < _current_date(today):
-            raise KeeporkillError("a quarantine expiry must not precede the current date")
+            raise TameshiError("a quarantine expiry must not precede the current date")
     elif expiry is not None:
-        raise KeeporkillError("an expiry date stands only on a quarantine ruling")
+        raise TameshiError("an expiry date stands only on a quarantine ruling")
     recomputed = floor_accounting(pack["canary_performance"], pack["catch_record"])
     if pack["floor"] != recomputed:
-        raise KeeporkillError(
+        raise TameshiError(
             "the pack floor accounting disagrees with the accounting recomputed "
             "from the pack evidence"
         )

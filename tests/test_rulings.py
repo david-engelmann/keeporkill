@@ -2,10 +2,10 @@ import copy
 
 import pytest
 
-from keeporkill.cli import main
-from keeporkill.errors import FloorRefusal, KeeporkillError
-from keeporkill.report import render_json
-from keeporkill.rulings import generate_ruling
+from tameshi.cli import main
+from tameshi.errors import FloorRefusal, TameshiError
+from tameshi.report import render_json
+from tameshi.rulings import generate_ruling
 from synthetic_data import (
     at_floor_pack,
     make_blindness_document,
@@ -19,7 +19,7 @@ AT_FLOOR_WORDS = ["caught"] * 30
 def test_ruling_record_for_each_ruling_in_the_set():
     pack = at_floor_pack()
     record, _ = generate_ruling(pack, "keep")
-    assert record["format"] == "keeporkill-ruling/1"
+    assert record["format"] == "tameshi-ruling/1"
     assert record["check"] == "unit checks"
     assert record["repo"] == pack["repo"]
     assert record["ruling"] == "keep"
@@ -37,20 +37,20 @@ def test_ruling_record_for_each_ruling_in_the_set():
 
 
 def test_quarantine_without_an_expiry_is_refused():
-    with pytest.raises(KeeporkillError) as caught:
+    with pytest.raises(TameshiError) as caught:
         generate_ruling(at_floor_pack(), "quarantine")
     assert "requires an expiry date" in str(caught.value)
 
 
 def test_expiry_on_a_non_quarantine_ruling_is_refused():
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         generate_ruling(at_floor_pack(), "keep", "2027-03-01")
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         generate_ruling(at_floor_pack(), "demote", "2027-03-01")
 
 
 def test_quarantine_expiry_before_the_supplied_current_date_is_refused():
-    with pytest.raises(KeeporkillError) as caught:
+    with pytest.raises(TameshiError) as caught:
         generate_ruling(
             at_floor_pack(), "quarantine", "2027-03-01", today="2027-03-02"
         )
@@ -65,7 +65,7 @@ def test_quarantine_expiry_on_the_supplied_current_date_generates():
 
 
 def test_quarantine_expiry_in_basic_iso_form_is_refused():
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         generate_ruling(
             at_floor_pack(), "quarantine", "20270301", today="2026-01-01"
         )
@@ -82,7 +82,7 @@ def test_generator_rederives_scored_defects_from_rows():
     forged["canary_performance"]["results"] = []
     forged["canary_performance"]["scored"] = 30
     forged["canary_performance"]["catch_rate"] = None
-    with pytest.raises(KeeporkillError) as caught:
+    with pytest.raises(TameshiError) as caught:
         generate_ruling(forged, "keep")
     assert "scored count disagrees" in str(caught.value)
 
@@ -90,40 +90,40 @@ def test_generator_rederives_scored_defects_from_rows():
 def test_pack_performance_with_an_extra_field_is_refused():
     forged = copy.deepcopy(at_floor_pack())
     forged["canary_performance"]["notes"] = "extra"
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         generate_ruling(forged, "keep")
 
 
 def test_a_pack_with_an_empty_scorecard_is_refused_by_the_generator():
     forged = copy.deepcopy(at_floor_pack())
     forged["scorecard"] = {}
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         generate_ruling(forged, "keep")
 
 
 def test_a_pack_with_a_malformed_history_window_is_refused_by_the_generator():
     forged = copy.deepcopy(at_floor_pack())
     forged["history_window"] = {"first_run_started_at": "2026-01-01T00:10:00Z"}
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         generate_ruling(forged, "keep")
 
 
 def test_ruling_pack_names_with_newlines_are_refused():
     forged = copy.deepcopy(at_floor_pack())
     forged["check"] = "unit checks\nSignature status signed"
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         generate_ruling(forged, "keep")
     forged = copy.deepcopy(at_floor_pack())
     forged["repo"] = "synthetic-repo\nInjected line"
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         generate_ruling(forged, "keep")
 
 
 def test_kill_is_refused_as_outside_the_slice_ruling_set():
-    with pytest.raises(KeeporkillError) as caught:
+    with pytest.raises(TameshiError) as caught:
         generate_ruling(at_floor_pack(), "kill")
     assert "outside the ruling set" in str(caught.value)
-    with pytest.raises(KeeporkillError):
+    with pytest.raises(TameshiError):
         generate_ruling(at_floor_pack(), "shred")
 
 
@@ -197,7 +197,7 @@ def test_a_pack_whose_floor_claim_disagrees_with_its_evidence_is_refused():
     forged["floor"]["canary_shortfall"] = 0
     forged["floor"]["meets_floor"] = True
     forged["below_floor"] = False
-    with pytest.raises(KeeporkillError) as caught:
+    with pytest.raises(TameshiError) as caught:
         generate_ruling(forged, "keep")
     assert not isinstance(caught.value, FloorRefusal)
     assert "disagrees" in str(caught.value)

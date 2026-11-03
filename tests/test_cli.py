@@ -1,7 +1,7 @@
 import json
 
-from keeporkill.cli import main
-from keeporkill.report import render_json
+from tameshi.cli import main
+from tameshi.report import render_json
 from synthetic_data import (
     at_floor_pack,
     make_blindness_document,

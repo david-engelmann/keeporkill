@@ -543,7 +543,7 @@
     "required_canary_defects": 30,
     "required_ci_history_days": 14
   },
-  "format": "keeporkill-pack/1",
+  "format": "tameshi-pack/1",
   "history_window": {
     "first_run_started_at": "2026-01-01T00:10:00Z",
     "last_run_updated_at": "2026-01-20T23:50:00Z"

@@ -1,19 +1,20 @@
-# keeporkill
+# tameshi
 
-The courtroom for checks, where catch record, canary performance, false block rate, cost per catch, and blindness traces are assembled into one evidence pack per check and the ruling is issued as a pull request.
+The evidence pack tool for checks, where catch record, canary performance, false block rate, cost per catch, and blindness traces are assembled into one evidence pack per check and the ruling is issued as a pull request.
 
 ## What this is
 
-Checks have no lifecycle in mainstream tooling. A check is required or it is absent, with no evidenced path through advisory, probation, and quarantine with expiry, so rational teams keep everything forever and suites grow into an hour of tests that stop nothing. Keeporkill assembles the evidence the gate instruments produce and rules on it, keep, demote to advisory, or quarantine with a date. Nothing is deleted by the tool, rulings stay human signed, and a check can win a stay by producing fresh evidence. The boundary with its sibling is one sentence. Keeporkill judges checks, verdictloop judges changes.
+Checks have no lifecycle in mainstream tooling. A check is required or it is absent, with no evidenced path through advisory, probation, and quarantine with expiry, so rational teams keep everything forever and suites grow into an hour of tests that stop nothing. Tameshi assembles the evidence the gate instruments produce and rules on it, keep, demote to advisory, or quarantine with a date. Nothing is deleted by the tool, rulings stay human signed, and a check can win a stay by producing fresh evidence. The boundary with its sibling is one sentence. Tameshi judges checks, verdictloop judges changes.
 
 ## Status
 
 - Slice 2 is built and proven on synthetic targets only
-- Slice 2 assembles one evidence pack per check in the format keeporkill-pack/1 from a catchledger pack or ledger, reading canaryfield results directly or from the pack and blindness traces where blindgate evidence is supplied
+- Slice 2 assembles one evidence pack per check in the format tameshi-pack/1 from a catchledger pack or ledger, reading canaryfield results directly or from the pack and blindness traces where blindgate evidence is supplied
 - Slice 2 accounts every pack against the evidence floor of 30 canaryfield-scored planted defects and 14 days of catchledger CI history, read as the span of each check own catch record timestamps, and marks a pack below the floor
-- Slice 2 generates the ruling pull request for a pack at or above the floor as a local ruling record in the format keeporkill-ruling/1 and a body whose numbers all come from the pack, refuses a ruling below the floor naming each failed leg and its shortfall, and emits unsigned records only
+- Slice 2 generates the ruling pull request for a pack at or above the floor as a local ruling record in the format tameshi-ruling/1 and a body whose numbers all come from the pack, refuses a ruling below the floor naming each failed leg and its shortfall, and emits unsigned records only
 - Slice 2 is the Round 1 work increment and is built on a local branch, and the round closes only after audit and two-axis review and red team and owner approval
-- Closed rounds stand at 1 of 100
+- Round 2 completes the rename from keeporkill to tameshi across the tree, refuses any JSON document that carries the same key twice in one object under obligation TM2-2, and opens the Rust port with slice 1 under obligations PORT-1 to PORT-6, carrying the rendering and the document reader and the pack assembly and the ruling generation into a standard library only crate proven by fifty one recorded conformance cases against the landed Python, with the catchledger document reading and the command line staying Python in this slice for the reasons the contract states
+- Closed rounds stand at 2 of 100
 - Seeded in October 2026. Part of the impatient programming portfolio, in the Gate Truth arc
 
 ## Licence

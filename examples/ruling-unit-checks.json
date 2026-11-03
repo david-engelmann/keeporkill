@@ -10,7 +10,7 @@
     "required_canary_defects": 30,
     "required_ci_history_days": 14
   },
-  "format": "keeporkill-ruling/1",
+  "format": "tameshi-ruling/1",
   "repo": "synthetic-repo",
   "ruling": "quarantine",
   "signature": {
