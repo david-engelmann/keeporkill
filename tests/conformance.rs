@@ -288,3 +288,115 @@ fn reader_cases_match_the_python_record() {
         check_error(case, outcome);
     }
 }
+
+fn port2_recordings() -> Vec<JsonValue> {
+    let path = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/tests/conformance/port2_cases.json"
+    );
+    let text =
+        std::fs::read_to_string(path).expect("the slice 2 recordings file stands in the tree");
+    let document = parse(&text).expect("the slice 2 recordings file parses");
+    document
+        .get("cases")
+        .and_then(|cases| cases.as_list())
+        .expect("the slice 2 recordings carry a case list")
+        .to_vec()
+}
+
+fn port2_cases_of_kind(kind: &str) -> Vec<JsonValue> {
+    port2_recordings()
+        .into_iter()
+        .filter(|case| case.get("kind").and_then(|value| value.as_text()) == Some(kind))
+        .collect()
+}
+
+#[test]
+fn ingest_cases_match_the_python_record() {
+    let cases = port2_cases_of_kind("ingest");
+    assert_eq!(
+        cases.len(),
+        84,
+        "the slice 2 recordings carry 84 ingest cases"
+    );
+    for case in &cases {
+        let document = case
+            .get("document")
+            .expect("each ingest case carries its document")
+            .clone();
+        let outcome = ingest::read_catchledger_packs(&document);
+        match outcome {
+            Ok(packs) => {
+                check_error(case, Ok(()));
+                let rendered = render_json(&JsonValue::List(packs));
+                assert_eq!(
+                    rendered,
+                    expected_text(case, "packs_rendered"),
+                    "case {} renders a different pack list",
+                    case_name(case)
+                );
+            }
+            Err(error) => check_error(case, Err(error)),
+        }
+    }
+}
+
+#[test]
+fn ingest_text_cases_match_the_python_record() {
+    let cases = port2_cases_of_kind("ingest_text");
+    assert_eq!(
+        cases.len(),
+        16,
+        "the slice 2 recordings carry 16 ingest text cases"
+    );
+    for case in &cases {
+        let text = case
+            .get("text")
+            .and_then(|value| value.as_text())
+            .unwrap_or("")
+            .to_string();
+        let outcome = reader::read_json_document(&text, "catchledger evidence")
+            .and_then(|document| ingest::read_catchledger_packs(&document));
+        match outcome {
+            Ok(packs) => {
+                check_error(case, Ok(()));
+                let rendered = render_json(&JsonValue::List(packs));
+                assert_eq!(
+                    rendered,
+                    expected_text(case, "packs_rendered"),
+                    "case {} renders a different pack list",
+                    case_name(case)
+                );
+            }
+            Err(error) => check_error(case, Err(error)),
+        }
+    }
+}
+
+#[test]
+fn a_catchledger_document_nested_past_the_bound_is_refused() {
+    // The nesting bound of PORT-3 as amended by RFIX-7 stands over
+    // the slice 2 reading unchanged, and the recordings cannot reach
+    // this case because the Python command line dies on such a
+    // document, so it stands as a named pin in the shape RFIX-7 sets.
+    // The reading under test recurses once per nesting level on the
+    // way to the bound, so it runs on a thread carrying a stack sized
+    // for the descent.
+    let text = format!("{}{}", "[".repeat(4001), "]".repeat(4001));
+    let outcome = std::thread::Builder::new()
+        .stack_size(64 * 1024 * 1024)
+        .spawn(move || {
+            reader::read_json_document(&text, "catchledger evidence")
+                .and_then(|document| ingest::read_catchledger_packs(&document))
+        })
+        .expect("the reader thread stands")
+        .join()
+        .expect("the reader thread finishes");
+    match outcome {
+        Ok(_) => panic!("a document nested past the bound was read"),
+        Err(error) => {
+            assert_eq!(error.class_name(), "TameshiError");
+            assert_eq!(error.message, "the catchledger evidence is not valid JSON");
+        }
+    }
+}
