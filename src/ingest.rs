@@ -4,8 +4,8 @@
 //!
 //! The reading of catchledger documents whole, the pack and ledger
 //! validation and the ledger derivation under the read entry of that
-//! module, is not carried in this slice, as obligation PORT-6 states.
-//! What stands here is the substrate the ported modules call. A
+//! module stands after the substrate under the obligations of PORT2.
+//! What stands first here is the substrate the ported modules call. A
 //! reading refuses exactly where its counterpart refuses and with the
 //! same wording.
 
@@ -60,49 +60,50 @@ pub fn py_trim(text: &str) -> &str {
     text.trim_matches(py_is_space)
 }
 
-fn field_set(fields: &[&str]) -> Vec<String> {
-    fields.iter().map(|field| field.to_string()).collect()
+/// The object standing in a value, refused in the wording the field
+/// readings give a value that is not an object.
+fn object_fields<'a>(value: &'a JsonValue, label: &str) -> Result<&'a Vec<(String, JsonValue)>> {
+    match value.as_object() {
+        Some(object) => Ok(object),
+        None => Err(TameshiError::refusal(format!(
+            "the {label} must be an object"
+        ))),
+    }
+}
+
+/// The refusal the field readings give a wrong field set, the
+/// missing names and the unexpected names each in sorted order.
+fn wrong_fields(label: &str, mut missing: Vec<&str>, mut unexpected: Vec<&str>) -> TameshiError {
+    missing.sort();
+    unexpected.sort();
+    let mut details: Vec<String> = Vec::new();
+    if !missing.is_empty() {
+        details.push(format!("missing {}", missing.join(", ")));
+    }
+    if !unexpected.is_empty() {
+        details.push(format!("unexpected {}", unexpected.join(", ")));
+    }
+    TameshiError::refusal(format!(
+        "the {label} has the wrong fields ({})",
+        details.join("; ")
+    ))
 }
 
 pub fn require_exact_fields(value: &JsonValue, fields: &[&str], label: &str) -> Result<()> {
-    let object = match value.as_object() {
-        Some(object) => object,
-        None => {
-            return Err(TameshiError::refusal(format!(
-                "the {label} must be an object"
-            )))
-        }
-    };
-    let wanted = field_set(fields);
-    let mut standing: Vec<String> = object.iter().map(|(name, _)| name.clone()).collect();
-    standing.sort();
-    let mut wanted_sorted = wanted.clone();
-    wanted_sorted.sort();
-    if standing != wanted_sorted {
-        let missing: Vec<&str> = wanted
-            .iter()
-            .map(|field| field.as_str())
-            .filter(|field| !standing.iter().any(|name| name == field))
-            .collect();
-        let mut unexpected: Vec<&str> = standing
-            .iter()
-            .map(|name| name.as_str())
-            .filter(|name| !wanted.iter().any(|field| field == name))
-            .collect();
-        let mut missing_sorted = missing.clone();
-        missing_sorted.sort();
-        unexpected.sort();
-        let mut details: Vec<String> = Vec::new();
-        if !missing_sorted.is_empty() {
-            details.push(format!("missing {}", missing_sorted.join(", ")));
-        }
-        if !unexpected.is_empty() {
-            details.push(format!("unexpected {}", unexpected.join(", ")));
-        }
-        return Err(TameshiError::refusal(format!(
-            "the {label} has the wrong fields ({})",
-            details.join("; ")
-        )));
+    let object = object_fields(value, label)?;
+    let standing: Vec<&str> = object.iter().map(|(name, _)| name.as_str()).collect();
+    let missing: Vec<&str> = fields
+        .iter()
+        .copied()
+        .filter(|field| !standing.contains(field))
+        .collect();
+    let unexpected: Vec<&str> = standing
+        .iter()
+        .copied()
+        .filter(|name| !fields.contains(name))
+        .collect();
+    if !missing.is_empty() || !unexpected.is_empty() {
+        return Err(wrong_fields(label, missing, unexpected));
     }
     Ok(())
 }
@@ -606,4 +607,239 @@ pub fn read_blindness_traces(document: &JsonValue) -> Result<Vec<(String, Vec<Js
         }
     }
     Ok(grouped)
+}
+
+pub const CATCHLEDGER_PACK_FORMAT: &str = "catchledger-pack/1";
+pub const CATCHLEDGER_LEDGER_FORMAT: &str = "catchledger-ledger/1";
+
+const CATCHLEDGER_PACK_FIELDS: [&str; 9] = [
+    "format",
+    "repo",
+    "check",
+    "scorecard",
+    "catch_record",
+    "canaryfield_results",
+    "false_block_rate",
+    "pricing",
+    "source",
+];
+const CATCHLEDGER_LEDGER_FIELDS: [&str; 6] =
+    ["format", "repo", "pricing", "source", "checks", "totals"];
+const CATCHLEDGER_LEDGER_ENTRY_FIELDS: [&str; 5] = [
+    "name",
+    "scorecard",
+    "catch_record",
+    "canaryfield_results",
+    "evidence_pack_file",
+];
+
+/// The field reading of the catchledger documents, exact in the
+/// required set with the history window standing optional beside it,
+/// as the field reading of the ingest module reads a pack or a
+/// ledger.
+fn require_fields_with_optional_window(
+    value: &JsonValue,
+    fields: &[&str],
+    label: &str,
+) -> Result<()> {
+    let object = object_fields(value, label)?;
+    let standing: Vec<&str> = object.iter().map(|(name, _)| name.as_str()).collect();
+    let missing: Vec<&str> = fields
+        .iter()
+        .copied()
+        .filter(|field| !standing.contains(field))
+        .collect();
+    let unexpected: Vec<&str> = standing
+        .iter()
+        .copied()
+        .filter(|name| !fields.contains(name) && *name != HISTORY_WINDOW_FIELD)
+        .collect();
+    if !missing.is_empty() || !unexpected.is_empty() {
+        return Err(wrong_fields(label, missing, unexpected));
+    }
+    Ok(())
+}
+
+/// The history window standing in a document, the value it stands as
+/// where it stands and null where it does not.
+fn standing_window(document: &JsonValue) -> JsonValue {
+    document
+        .get(HISTORY_WINDOW_FIELD)
+        .cloned()
+        .unwrap_or(JsonValue::Null)
+}
+
+/// Write a field into an object value, standing in place of the
+/// value it carried or standing last where it did not stand.
+fn set_field(value: &mut JsonValue, name: &str, field_value: JsonValue) {
+    if let JsonValue::Object(fields) = value {
+        match fields.iter_mut().find(|(key, _)| key == name) {
+            Some((_, slot)) => *slot = field_value,
+            None => fields.push((name.to_string(), field_value)),
+        }
+    }
+}
+
+/// The pack validation of the ingest module, reading one catchledger
+/// pack document and handing it back with its history window
+/// standing in it.
+fn validate_catchledger_pack(pack: &JsonValue) -> Result<JsonValue> {
+    require_fields_with_optional_window(pack, &CATCHLEDGER_PACK_FIELDS, "catchledger pack")?;
+    if pack.get("format").and_then(|value| value.as_text()) != Some(CATCHLEDGER_PACK_FORMAT) {
+        return Err(TameshiError::refusal(
+            "the catchledger pack carries the wrong format name",
+        ));
+    }
+    require_name(
+        pack.get("repo").unwrap_or(&JsonValue::Null),
+        "catchledger repository label",
+    )?;
+    require_name(
+        pack.get("check").unwrap_or(&JsonValue::Null),
+        "catchledger check name",
+    )?;
+    let scorecard = pack.get("scorecard").unwrap_or(&JsonValue::Null);
+    validate_scorecard(scorecard)?;
+    if pack.get("false_block_rate").unwrap_or(&JsonValue::Null)
+        != scorecard
+            .get("false_block_rate")
+            .unwrap_or(&JsonValue::Null)
+    {
+        return Err(TameshiError::refusal(
+            "the catchledger pack false block rate disagrees with its scorecard",
+        ));
+    }
+    validate_catch_record(pack.get("catch_record").unwrap_or(&JsonValue::Null))?;
+    validate_normalized_canary(pack.get("canaryfield_results").unwrap_or(&JsonValue::Null))?;
+    if !pack
+        .get("pricing")
+        .map(|value| value.is_object())
+        .unwrap_or(false)
+        || !pack
+            .get("source")
+            .map(|value| value.is_object())
+            .unwrap_or(false)
+    {
+        return Err(TameshiError::refusal(
+            "the catchledger pack pricing and source must be objects",
+        ));
+    }
+    let window = standing_window(pack);
+    validate_history_window(&window)?;
+    let mut normalized = pack.clone();
+    set_field(&mut normalized, HISTORY_WINDOW_FIELD, window);
+    Ok(normalized)
+}
+
+/// The derivation of one pack from one ledger entry, as the ingest
+/// module derives it, the pack carrying the ledger repository label
+/// and pricing and source and history window as written.
+fn derive_pack_from_entry(
+    entry: &JsonValue,
+    ledger: &JsonValue,
+    window: &JsonValue,
+) -> Result<JsonValue> {
+    require_exact_fields(
+        entry,
+        &CATCHLEDGER_LEDGER_ENTRY_FIELDS,
+        "catchledger ledger entry",
+    )?;
+    require_name(
+        entry.get("name").unwrap_or(&JsonValue::Null),
+        "catchledger check name",
+    )?;
+    let scorecard = entry.get("scorecard").unwrap_or(&JsonValue::Null);
+    validate_scorecard(scorecard)?;
+    validate_catch_record(entry.get("catch_record").unwrap_or(&JsonValue::Null))?;
+    validate_normalized_canary(entry.get("canaryfield_results").unwrap_or(&JsonValue::Null))?;
+    Ok(JsonValue::Object(vec![
+        (
+            "format".to_string(),
+            JsonValue::Text(CATCHLEDGER_PACK_FORMAT.to_string()),
+        ),
+        (
+            "repo".to_string(),
+            ledger.get("repo").cloned().unwrap_or(JsonValue::Null),
+        ),
+        (
+            "check".to_string(),
+            entry.get("name").cloned().unwrap_or(JsonValue::Null),
+        ),
+        ("scorecard".to_string(), scorecard.clone()),
+        (
+            "catch_record".to_string(),
+            entry
+                .get("catch_record")
+                .cloned()
+                .unwrap_or(JsonValue::Null),
+        ),
+        (
+            "canaryfield_results".to_string(),
+            entry
+                .get("canaryfield_results")
+                .cloned()
+                .unwrap_or(JsonValue::Null),
+        ),
+        (
+            "false_block_rate".to_string(),
+            scorecard
+                .get("false_block_rate")
+                .cloned()
+                .unwrap_or(JsonValue::Null),
+        ),
+        (
+            "pricing".to_string(),
+            ledger.get("pricing").cloned().unwrap_or(JsonValue::Null),
+        ),
+        (
+            "source".to_string(),
+            ledger.get("source").cloned().unwrap_or(JsonValue::Null),
+        ),
+        (HISTORY_WINDOW_FIELD.to_string(), window.clone()),
+    ]))
+}
+
+/// Read one catchledger document, a pack or a ledger, into the
+/// catchledger packs it carries, as the read entry of the ingest
+/// module reads one. A pack reads as the one pack it carries, and a
+/// ledger reads as the packs derived from its entries in their
+/// standing order.
+pub fn read_catchledger_packs(document: &JsonValue) -> Result<Vec<JsonValue>> {
+    if !document.is_object() {
+        return Err(TameshiError::refusal(
+            "the catchledger evidence must be an object",
+        ));
+    }
+    match document.get("format").and_then(|value| value.as_text()) {
+        Some(CATCHLEDGER_PACK_FORMAT) => Ok(vec![validate_catchledger_pack(document)?]),
+        Some(CATCHLEDGER_LEDGER_FORMAT) => {
+            require_fields_with_optional_window(
+                document,
+                &CATCHLEDGER_LEDGER_FIELDS,
+                "catchledger ledger",
+            )?;
+            require_name(
+                document.get("repo").unwrap_or(&JsonValue::Null),
+                "catchledger repository label",
+            )?;
+            let checks = match document.get("checks").and_then(|value| value.as_list()) {
+                Some(checks) => checks,
+                None => {
+                    return Err(TameshiError::refusal(
+                        "the catchledger ledger checks must be a list",
+                    ))
+                }
+            };
+            let window = standing_window(document);
+            validate_history_window(&window)?;
+            let mut packs = Vec::new();
+            for entry in checks {
+                packs.push(derive_pack_from_entry(entry, document, &window)?);
+            }
+            Ok(packs)
+        }
+        _ => Err(TameshiError::refusal(
+            "the catchledger evidence carries an unknown format name",
+        )),
+    }
 }
