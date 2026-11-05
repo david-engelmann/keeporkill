@@ -42,8 +42,25 @@ fn case_dir(index: usize, name: &str) -> PathBuf {
         .map(|ch| if ch.is_ascii_alphanumeric() { ch } else { '-' })
         .collect();
     std::env::temp_dir()
-        .join("tameshi-cli-battery")
+        .join(format!("tameshi-cli-battery-{}", std::process::id()))
         .join(format!("case-{index:03}-{slug}"))
+}
+
+/// A scratch directory that removes itself when it leaves scope,
+/// so a panicking assertion leaves no state behind and concurrent
+/// test processes never share a path.
+struct ScratchDir(PathBuf);
+
+impl ScratchDir {
+    fn hold(path: &Path) -> ScratchDir {
+        ScratchDir(path.to_path_buf())
+    }
+}
+
+impl Drop for ScratchDir {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_dir_all(&self.0);
+    }
 }
 
 fn collect_files(root: &Path, dir: &Path, into: &mut BTreeMap<String, Vec<u8>>) {
@@ -71,6 +88,7 @@ fn run_case(index: usize, case: &JsonValue) {
         std::fs::remove_dir_all(&dir).expect("a stale case directory clears");
     }
     std::fs::create_dir_all(&dir).expect("a case directory stands");
+    let _scratch = ScratchDir::hold(&dir);
     let inputs = case
         .get("inputs")
         .and_then(|value| value.as_object())
@@ -194,7 +212,7 @@ fn recorded_input(case_name: &str, input: &str) -> String {
 }
 
 fn pin_dir(name: &str) -> PathBuf {
-    let dir = std::env::temp_dir().join(name);
+    let dir = std::env::temp_dir().join(format!("{name}-{}", std::process::id()));
     if dir.exists() {
         std::fs::remove_dir_all(&dir).expect("a stale pin directory clears");
     }
@@ -241,6 +259,7 @@ fn test_a_file_name_carrying_a_non_utf8_byte_is_read() {
     use std::os::unix::ffi::{OsStrExt, OsStringExt};
 
     let dir = pin_dir("tameshi-cli-nonutf8");
+    let _scratch = ScratchDir::hold(&dir);
     let ledger = recorded_input("deterministic pack outputs", "ledger.json");
     let mut bad_name = dir.as_os_str().as_bytes().to_vec();
     bad_name.extend_from_slice(b"/led\xffger.json");
@@ -299,6 +318,7 @@ fn test_a_file_name_carrying_a_non_utf8_byte_is_read() {
 #[test]
 fn test_a_document_nested_past_the_reader_bound_is_refused_by_the_command_line() {
     let dir = pin_dir("tameshi-cli-nesting");
+    let _scratch = ScratchDir::hold(&dir);
     let ledger = recorded_input("deterministic pack outputs", "ledger.json");
     let nest = format!("{}{}", "[".repeat(4500), "]".repeat(4500));
     let deep = ledger.replacen(
