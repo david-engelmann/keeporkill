@@ -7,7 +7,9 @@
 //! validation and normalization readings they stand on, and it proves
 //! each against recorded conformance drawn from the landed Python.
 //! Slice 2 adds the catchledger document reading whole, the read
-//! entry the assembly stands on, proven the same way.
+//! entry the assembly stands on, proven the same way. The closing
+//! slice carries the command line whole into the binary over this
+//! library, proven against a recorded battery of invocations.
 
 pub mod dates;
 pub mod errors;

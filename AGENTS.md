@@ -61,4 +61,4 @@ No ruling issues below the evidence floor. A check's evidence must hold at least
 
 Rulings stay human signed and the tool deletes nothing. The generator emits an unsigned ruling record only, and a human signs the ruling outside the tool.
 
-All inputs are local files. The evidence inputs are catchledger packs and ledgers and canaryfield catch results and, where supplied, blindgate evidence, read from local files only, with synthetic fixtures only and no network in the tool or the tests. The local gate is python -m pytest and cargo test once the crate exists. The closed round count stands in the README and moves only at a closure.
+All inputs are local files. The evidence inputs are catchledger packs and ledgers and canaryfield catch results and, where supplied, blindgate evidence, read from local files only, with synthetic fixtures only and no network in the tool or the tests. The local gate is cargo test. The closed round count stands in the README and moves only at a closure.
