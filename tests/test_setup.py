@@ -10,7 +10,7 @@ def test_seed_files_present():
     gitignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
     assert "# tameshi" in readme
     assert "The evidence pack tool for checks" in readme
-    assert "Closed rounds stand at 2 of 100" in readme
+    assert "Closed rounds stand at 3 of 100" in readme
     assert "## Licence" in readme
     assert "MIT License" in licence
     assert "__pycache__/" in gitignore

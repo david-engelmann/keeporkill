@@ -15,7 +15,7 @@ Checks have no lifecycle in mainstream tooling. A check is required or it is abs
 - Slice 2 is the Round 1 work increment and is built on a local branch, and the round closes only after audit and two-axis review and red team and owner approval
 - Round 2 completes the rename from keeporkill to tameshi across the tree, refuses any JSON document that carries the same key twice in one object under obligation TM2-2, and opens the Rust port with slice 1 under obligations PORT-1 to PORT-6, carrying the rendering and the document reader and the pack assembly and the ruling generation into a standard library only crate proven by fifty one recorded conformance cases against the landed Python, with the catchledger document reading and the command line staying Python in this slice for the reasons the contract states
 - Round 3 opens the second Rust port slice under obligations PORT2-1 to PORT2-6, carrying the catchledger document reading whole into the crate, the pack and ledger validation and the ledger derivation under the read entry the pack assembly stands on, proven by one hundred further recorded conformance cases against the landed Python, and the slice is built on a local branch and the round closes only after audit and two-axis review and red team and owner approval, with the command line and the package front doors staying Python for the reasons the contract states
-- Closed rounds stand at 2 of 100
+- Closed rounds stand at 3 of 100
 - Seeded in October 2026. Part of the impatient programming portfolio, in the Gate Truth arc
 
 ## Licence
