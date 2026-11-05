@@ -1,0 +1,113 @@
+# The disposition of every test name the contract carries, under
+# obligation PORT3-5. One line disposes one name, and a name may
+# stand on more than one line where its proof stands in more than
+# one place. Each line carries four fields parted by a pipe, the
+# test name and the disposition kind and the file and the target.
+# A rust-test line names a Rust test standing in the named file
+# under the target name. A re-expressed line names the new Rust
+# test the behaviour stands under. A recording-section line names
+# a section of a recordings file, read in that file as the kind
+# field of its cases or as the section field of the battery cases.
+# A recording-case line names one recorded case of a recordings
+# file. The test named test_every_contract_name_is_disposed reads
+# this file and the contract and asserts that every name the
+# contract carries stands here and that every target named here
+# stands in the tree.
+test_a_document_nested_past_the_reader_bound_is_refused_by_the_command_line | rust-test | tests/cli.rs | test_a_document_nested_past_the_reader_bound_is_refused_by_the_command_line
+test_a_document_with_a_repeated_nested_key_is_refused | recording-section | tests/conformance/cli_cases.json | refusals
+test_a_document_with_a_repeated_nested_key_is_refused | recording-case | tests/conformance/port2_cases.json | a repeated key inside a scorecard text is refused
+test_a_document_with_a_repeated_top_level_key_is_refused | recording-section | tests/conformance/cli_cases.json | refusals
+test_a_document_with_a_repeated_top_level_key_is_refused | recording-case | tests/conformance/port2_cases.json | a repeated key at the top of a pack document text is refused
+test_a_file_name_carrying_a_non_utf8_byte_is_read | rust-test | tests/cli.rs | test_a_file_name_carrying_a_non_utf8_byte_is_read
+test_a_pack_whose_floor_claim_disagrees_with_its_evidence_is_refused | recording-case | tests/conformance/port1_cases.json | a tampered floor accounting is refused
+test_a_pack_with_a_malformed_history_window_is_refused_by_the_generator | recording-case | tests/conformance/port1_cases.json | a pack with a malformed history window is refused
+test_a_pack_with_an_empty_scorecard_is_refused_by_the_generator | recording-case | tests/conformance/port1_cases.json | a pack with an empty scorecard is refused
+test_a_pack_without_a_history_window_reads_zero_history_days | recording-case | tests/conformance/port1_cases.json | an absent history window reads as null with zero history days
+test_a_pack_without_a_history_window_reads_zero_history_days | recording-case | tests/conformance/port2_cases.json | a catchledger pack with a null history window reads
+test_a_refusal_names_each_failed_leg_and_its_shortfall | recording-case | tests/conformance/port1_cases.json | shortfalls on both legs refuse naming both
+test_a_refusal_writes_no_artifacts | recording-section | tests/conformance/cli_cases.json | behaviours
+test_a_repeated_key_in_a_canaryfield_or_blindness_document_is_refused | recording-section | tests/conformance/cli_cases.json | refusals
+test_a_repeated_key_in_an_evidence_pack_is_refused | recording-section | tests/conformance/cli_cases.json | refusals
+test_agents_template_and_annex | rust-test | tests/setup.rs | test_agents_template_and_annex
+test_an_empty_catch_record_holds_zero_history_days | recording-case | tests/conformance/port1_cases.json | an absent history window reads as null with zero history days
+test_an_evidence_pack_carrying_the_old_format_stem_fails_validation | recording-case | tests/conformance/port1_cases.json | a pack under the old format stem fails validation
+test_an_evidence_pack_carrying_the_old_format_stem_is_refused_by_the_generator | recording-case | tests/conformance/port1_cases.json | a pack under the old format stem is refused
+test_assembled_packs_and_rulings_carry_the_tameshi_format_stems | recording-section | tests/conformance/port1_cases.json | assemble
+test_assembled_packs_and_rulings_carry_the_tameshi_format_stems | recording-section | tests/conformance/port1_cases.json | ruling
+test_blindness_traces_are_carried_for_their_check | recording-case | tests/conformance/port1_cases.json | at floor direct canary for two checks with matched and unmatched traces
+test_canary_catch_rate_is_null_when_no_defect_is_scored | recording-case | tests/conformance/port1_cases.json | a direct document scoring nothing reads a null catch rate
+test_canaryfield_performance_is_null_without_an_exact_gate_match | recording-case | tests/conformance/port1_cases.json | a direct document without the check gate leaves the performance null
+test_canaryfield_performance_is_null_without_an_exact_gate_match | recording-case | tests/conformance/port1_cases.json | no canary evidence anywhere
+test_catchledger_input_with_a_missing_or_unexpected_field_is_refused | recording-case | tests/conformance/port2_cases.json | a catchledger pack missing its pricing is refused
+test_catchledger_input_with_a_missing_or_unexpected_field_is_refused | recording-case | tests/conformance/port2_cases.json | a catchledger pack carrying an extra field is refused
+test_catchledger_input_with_a_missing_or_unexpected_field_is_refused | recording-case | tests/conformance/port2_cases.json | a ledger entry missing its name is refused
+test_catchledger_input_with_a_missing_or_unexpected_field_is_refused | recording-case | tests/conformance/port2_cases.json | a ledger entry scorecard missing a field is refused
+test_catchledger_input_with_a_wrong_format_name_is_refused | recording-case | tests/conformance/port2_cases.json | a pack format at a neighbouring version is refused as unknown
+test_catchledger_input_with_a_wrong_format_name_is_refused | recording-case | tests/conformance/port2_cases.json | a missing format is refused as unknown
+test_catchledger_pack_with_a_disagreeing_false_block_rate_is_refused | recording-case | tests/conformance/port2_cases.json | a pack whose rate disagrees with its scorecard is refused
+test_cli_battery_matches_the_python_record | rust-test | tests/cli.rs | test_cli_battery_matches_the_python_record
+test_cli_rule_uses_the_supplied_current_date_for_expiry | recording-section | tests/conformance/cli_cases.json | behaviours
+test_cli_validate_accepts_a_pack_rebuilt_from_its_inputs | recording-section | tests/conformance/cli_cases.json | behaviours
+test_cli_validate_refuses_a_tampered_pack | recording-section | tests/conformance/cli_cases.json | behaviours
+test_cli_writes_deterministic_pack_outputs | recording-section | tests/conformance/cli_cases.json | behaviours
+test_cli_writes_deterministic_ruling_outputs | recording-section | tests/conformance/cli_cases.json | behaviours
+test_contract_has_no_forbidden_dashes | rust-test | tests/contract.rs | test_contract_has_no_forbidden_dashes
+test_direct_canaryfield_document_overrides_embedded_results | recording-case | tests/conformance/port1_cases.json | a direct canary document overrides embedded results
+test_direct_canaryfield_document_with_a_repeated_seed_is_refused | recording-case | tests/conformance/port1_cases.json | a direct document repeating a seed is refused
+test_direct_canaryfield_results_are_normalized_for_the_matching_check | recording-case | tests/conformance/port1_cases.json | at floor direct canary for two checks with matched and unmatched traces
+test_direct_canaryfield_results_are_normalized_for_the_matching_check | recording-section | tests/conformance/port1_cases.json | assemble
+test_embedded_canary_counts_are_tallied_from_their_rows | recording-case | tests/conformance/port1_cases.json | embedded counts disagreeing with their rows are refused
+test_embedded_canary_counts_are_tallied_from_their_rows | recording-case | tests/conformance/port1_cases.json | two checks assemble in sorted order with an embedded canary
+test_embedded_canary_forgery_with_scored_thirty_and_no_rows_is_refused | recording-case | tests/conformance/port1_cases.json | a forged embedded canary carrying a scored field is refused
+test_embedded_canaryfield_results_are_used_without_a_direct_document | recording-case | tests/conformance/port1_cases.json | two checks assemble in sorted order with an embedded canary
+test_every_contract_name_is_disposed | rust-test | tests/contract.rs | test_every_contract_name_is_disposed
+test_exactly_at_the_floor_generates_a_ruling | recording-case | tests/conformance/port1_cases.json | keep at the floor
+test_expiry_on_a_non_quarantine_ruling_is_refused | recording-case | tests/conformance/port1_cases.json | an expiry on keep is refused
+test_expiry_on_a_non_quarantine_ruling_is_refused | recording-section | tests/conformance/port1_cases.json | ruling
+test_floor_accounting_counts_scored_defects_and_history_days | recording-section | tests/conformance/port1_cases.json | assemble
+test_floor_counts_history_days_from_the_window_span | recording-section | tests/conformance/cli_cases.json | behaviours
+test_floor_counts_history_days_from_the_window_span | recording-section | tests/conformance/port1_cases.json | assemble
+test_floor_days_convert_offset_timestamps_to_utc | recording-case | tests/conformance/port1_cases.json | offset timestamps convert to UTC days in the floor
+test_floor_marks_a_pack_below_floor_on_either_leg | recording-section | tests/conformance/port1_cases.json | assemble
+test_floor_marks_a_pack_below_floor_on_either_leg | recording-case | tests/conformance/port1_cases.json | shortfalls on both legs refuse naming both
+test_generated_rulings_are_always_unsigned | recording-section | tests/conformance/port1_cases.json | ruling
+test_generator_rederives_scored_defects_from_rows | recording-case | tests/conformance/port1_cases.json | a scored count disagreeing with its rows is refused
+test_kill_is_refused_as_outside_the_slice_ruling_set | recording-case | tests/conformance/port1_cases.json | kill is refused
+test_kill_is_refused_as_outside_the_slice_ruling_set | recording-case | tests/conformance/port1_cases.json | an unknown ruling word is refused
+test_ledger_input_derives_the_same_packs | recording-case | tests/conformance/port2_cases.json | a catchledger ledger document derives its packs
+test_malformed_blindness_document_is_refused | recording-case | tests/conformance/port1_cases.json | a blindness document under the wrong format name is refused
+test_malformed_blindness_document_is_refused | recording-case | tests/conformance/port1_cases.json | a blindness trace with empty detail is refused
+test_malformed_canaryfield_document_is_refused | recording-case | tests/conformance/port1_cases.json | a canary document with no gates is refused
+test_malformed_canaryfield_document_is_refused | recording-section | tests/conformance/port1_cases.json | assemble
+test_missing_inputs_are_refused | recording-section | tests/conformance/cli_cases.json | behaviours
+test_names_with_newlines_are_refused_at_ingest | recording-case | tests/conformance/port2_cases.json | a ledger entry name carrying a newline is refused
+test_names_with_newlines_are_refused_at_ingest | recording-case | tests/conformance/port2_cases.json | a check name carrying a newline and a broken scorecard refuse at the name
+test_one_day_of_own_history_under_a_forty_day_window_refuses | recording-section | tests/conformance/cli_cases.json | behaviours
+test_outputs_carry_no_local_paths | recording-section | tests/conformance/cli_cases.json | behaviours
+test_pack_carries_blindness_traces_only_where_supplied | recording-case | tests/conformance/port1_cases.json | at floor direct canary for two checks with matched and unmatched traces
+test_pack_carries_blindness_traces_only_where_supplied | recording-section | tests/conformance/port1_cases.json | assemble
+test_pack_carries_the_complete_check_evidence | recording-case | tests/conformance/port1_cases.json | at floor direct canary for two checks with matched and unmatched traces
+test_pack_input_is_read_exactly | recording-case | tests/conformance/port2_cases.json | a catchledger pack document reads
+test_pack_performance_with_an_extra_field_is_refused | recording-section | tests/conformance/cli_cases.json | refusals
+test_pack_sources_count_unmatched_blindness_traces | recording-case | tests/conformance/port1_cases.json | at floor direct canary for two checks with matched and unmatched traces
+test_pack_sources_record_the_evidence_origins | recording-case | tests/conformance/port1_cases.json | at floor direct canary for two checks with matched and unmatched traces
+test_pack_sources_record_the_evidence_origins | recording-case | tests/conformance/port1_cases.json | two checks assemble in sorted order with an embedded canary
+test_pack_validation_accepts_a_rebuilt_pack | recording-case | tests/conformance/port1_cases.json | a rebuilt pack validates
+test_pack_validation_refuses_a_tampered_floor | recording-case | tests/conformance/port1_cases.json | a tampered floor fails validation
+test_pack_validation_refuses_tampered_evidence_and_metadata | recording-case | tests/conformance/port1_cases.json | a pack naming a check outside its inputs fails validation
+test_pack_validation_refuses_tampered_evidence_and_metadata | recording-section | tests/conformance/port1_cases.json | validate
+test_quarantine_expiry_before_the_supplied_current_date_is_refused | recording-case | tests/conformance/port1_cases.json | an expiry before the current date is refused
+test_quarantine_expiry_in_basic_iso_form_is_refused | recording-case | tests/conformance/port1_cases.json | an expiry in basic ISO form is refused
+test_quarantine_expiry_on_the_supplied_current_date_generates | recording-case | tests/conformance/port1_cases.json | an expiry on the current date generates
+test_quarantine_without_an_expiry_is_refused | recording-case | tests/conformance/port1_cases.json | quarantine without an expiry is refused
+test_ruling_body_names_the_ruling_and_expiry | recording-case | tests/conformance/port1_cases.json | quarantine at the floor
+test_ruling_body_names_the_ruling_and_expiry | recording-case | tests/conformance/port1_cases.json | keep at the floor
+test_ruling_body_numbers_all_come_from_the_pack | recording-case | tests/conformance/port1_cases.json | quarantine over a pack carrying two blindness traces
+test_ruling_pack_names_with_newlines_are_refused | recording-case | tests/conformance/port1_cases.json | a pack with a newline in its check name is refused
+test_ruling_record_for_each_ruling_in_the_set | recording-case | tests/conformance/port1_cases.json | keep at the floor
+test_ruling_record_for_each_ruling_in_the_set | recording-case | tests/conformance/port1_cases.json | demote at the floor
+test_ruling_record_for_each_ruling_in_the_set | recording-case | tests/conformance/port1_cases.json | quarantine at the floor
+test_scored_defects_exclude_not_applicable_rows | recording-case | tests/conformance/port1_cases.json | at floor direct canary for two checks with matched and unmatched traces
+test_seed_files_present | rust-test | tests/setup.rs | test_seed_files_present
+test_thirteen_history_days_refuse_a_ruling | recording-case | tests/conformance/port1_cases.json | thirteen history days refuse on the CI leg alone
+test_twenty_nine_scored_defects_refuse_a_ruling | recording-case | tests/conformance/port1_cases.json | twenty nine scored defects refuse on the canary leg alone
